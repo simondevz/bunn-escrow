@@ -8,8 +8,8 @@ contract Escrow {
     uint256 public transactionCount;
     struct Transaction {
         bool paidStatus;
-    	address receiver;
-        address sender;
+    	address payable  receiver;
+        address payable  sender;
         uint amount;
         string description;
         uint paymentWindow;
@@ -26,11 +26,22 @@ contract Escrow {
         _;
     }
 
-    function createTransaction (address toAddress, uint amount, uint deliveryTime) public  {}
+    function createTransaction (address payable  toAddress, uint amount, uint deliveryTime, string memory description) public  {
+        require(msg.sender != admin, "Admin cannot create escrow");
+        Transaction memory _transaction = Transaction(false, toAddress, payable (msg.sender), amount, description, deliveryTime);
+        transactions[transactionCount] = _transaction;
+        transactionCount++; // increment transaction count tracker
+    }
 
-    function transactionDetails (uint id) public {}
+    function transactionDetails (uint id) view public returns (Transaction memory){
+        return transactions[id];
+    }
 
-    function refundFunds (uint id) public onlyAdmin {}
+    function refundFunds (uint id) public onlyAdmin {
+        require(!transactions[id].paidStatus, "Payment already made");
+        transactions[id].sender.transfer(transactions[id].amount);
+        transactions[id].paidStatus = true;
+    }
 
     function payReciever(uint transactionId) public onlyAdmin {
         require(transactions[transactionId].receiver == msg.sender, "Unauthorized receiver");

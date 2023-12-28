@@ -6,6 +6,8 @@ contract Escrow {
 
     uint256[] public transactionIds;
     uint256 public transactionCount;
+    uint256 public transactionId;
+
     struct Transaction {
         bool paidStatus;
     	address payable  receiver;
@@ -19,6 +21,7 @@ contract Escrow {
 
     constructor() {
         admin = msg.sender;
+        transactionId = 1001;
     }
 
     modifier onlyAdmin() {
@@ -27,10 +30,12 @@ contract Escrow {
     }
 
     function createTransaction (address payable  toAddress, uint amount, uint deliveryTime, string memory description) public  {
-        require(msg.sender != admin, "Admin cannot create escrow");
-        Transaction memory _transaction = Transaction(false, toAddress, payable (msg.sender), amount, description, deliveryTime);
-        transactions[transactionCount] = _transaction;
-        transactionCount++; // increment transaction count tracker
+        require(msg.sender != admin, "Admin cannot create an escrow");
+        Transaction memory _transaction = Transaction(false, toAddress, payable (msg.sender), amount, description, block.timestamp + deliveryTime);
+        transactions[transactionId] = _transaction;
+        transactionIds.push(transactionId);
+        transactionCount++; 
+        transactionId++;
     }
 
     function transactionDetails (uint id) view public returns (Transaction memory){

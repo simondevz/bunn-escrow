@@ -6,19 +6,22 @@ contract Escrow {
 
     uint256[] public transactionIds;
     uint256 public transactionCount;
+    uint256 public transactionId;
+
     struct Transaction {
         bool paidStatus;
-    	address receiver;
-        address sender;
+    	address payable  receiver;
+        address payable  sender;
         uint amount;
         string description;
         uint paymentWindow;
     }
 
-     mapping(uint256 => Transaction) public transactions;
+    mapping(uint256 => Transaction) public transactions;
 
     constructor() {
         admin = msg.sender;
+        transactionId = 1001;
     }
 
     modifier onlyAdmin() {
@@ -26,24 +29,39 @@ contract Escrow {
         _;
     }
 
-    function createTransaction (address toAddress, uint amount, uint deliveryTime) public  {}
+    function createTransaction (address payable  toAddress, uint deliveryTime, string memory description) public payable  {
+        uint amount = msg.value;
+        require(amount > 0, "Amount must be more than 0");
+        require(msg.sender != admin, "Admin cannot create an escrow");
+        Transaction memory _transaction = Transaction(false, toAddress, payable (msg.sender), amount, description, block.timestamp + deliveryTime);
+        transactions[transactionId] = _transaction;
+        transactionIds.push(transactionId);
+        transactionCount++; 
+        transactionId++;
+    }
 
-    function transactionDetails (uint id) public {}
+    function transactionDetails (uint id) view public returns (Transaction memory){
+        return transactions[id];
+    }
 
-    function refundFunds (uint id) public onlyAdmin {}
+    function refundFunds (uint id) public onlyAdmin {
+        require(!transactions[id].paidStatus, "Payment already made");
+        transactions[id].sender.transfer(transactions[id].amount);
+        transactions[id].paidStatus = true;
+    }
 
-    function payReciever(uint transactionId) public onlyAdmin {
-        require(transactions[transactionId].receiver == msg.sender, "Unauthorized receiver");
-        require(!transactions[transactionId].paidStatus, "Payment already made");
-        require(block.timestamp >= transactions[transactionId].paymentWindow, "Payment window not expired yet");
+    function Claim(uint id) public {
+        require(transactions[id].receiver == msg.sender, "Unauthorized receiver");
+        require(!transactions[id].paidStatus, "Payment already made");
+        require(block.timestamp >= transactions[id].paymentWindow, "Payment window not expired yet");
 
         // Perform payment
-        address payable receiver = payable(transactions[transactionId].receiver);
-        uint256 amountToSend = transactions[transactionId].amount;
+        address payable receiver = payable(transactions[id].receiver);
+        uint256 amountToSend = transactions[id].amount;
 
         require(address(this).balance >= amountToSend, "Insufficient contract balance");
 
-        transactions[transactionId].paidStatus = true; // Mark transaction as paid
+        transactions[id].paidStatus = true; // Mark transaction as paid
         receiver.transfer(amountToSend); // Send the amount to the receiver
     }
 

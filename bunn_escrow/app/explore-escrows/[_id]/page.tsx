@@ -23,12 +23,11 @@ export default function TransactionDetailsPage({
     useState<string>("Connect wallet");
   const [claimButtonText, setClaimButtonText] = useState<string>("Claim");
 
-  const infuraUrl =
-    "https://sepolia.infura.io/v3/97787e63918c4febb1a8e82b16f66f66"; // Replace with your Infura URL
-  const web3 = new Web3(new Web3.providers.HttpProvider(infuraUrl));
+  const infuraUrl = process.env.NEXT_PUBLIC_INFURA_LINK; // Replace with your Infura URL
+  const web3 = new Web3(new Web3.providers.HttpProvider(infuraUrl as string));
   const { data, error }: { data: TransactionType | undefined; error: any } =
     useContractRead({
-      address: "0x82D9a99Bf84de667245A09152a03Dc8225Db6eC6",
+      address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
       abi: ABI,
       functionName: "transactionDetails",
       args: [params?._id],

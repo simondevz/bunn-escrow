@@ -14,8 +14,12 @@ export default function CustomWagmiConfig({
     [sepolia],
     [
       publicProvider(),
-      alchemyProvider({ apiKey: "IbnnqwmcUGXHPGAGVPN03_-DxOACzp" }), // TODO: Get production keys and move to a dot env file
-      infuraProvider({ apiKey: "97787e63918c4febb1a8e82b16f66f66" }),
+      alchemyProvider({
+        apiKey: process.env.NEXT_PUBLIC_ALCHEMY_APIKEY as string,
+      }), // TODO: Get production keys and move to a dot env file
+      infuraProvider({
+        apiKey: process.env.NEXT_PUBLIC_INFURA_APIKEY as string,
+      }),
     ]
   );
 

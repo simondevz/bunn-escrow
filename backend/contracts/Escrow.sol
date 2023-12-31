@@ -9,6 +9,7 @@ contract Escrow {
     uint256 public transactionId;
 
     struct Transaction {
+        uint _id;
         bool paidStatus;
     	address payable  receiver;
         address payable  sender;
@@ -33,7 +34,7 @@ contract Escrow {
         uint amount = msg.value;
         require(amount > 0, "Amount must be more than 0");
         require(msg.sender != admin, "Admin cannot create an escrow");
-        Transaction memory _transaction = Transaction(false, toAddress, payable (msg.sender), amount, description, block.timestamp + deliveryTime);
+        Transaction memory _transaction = Transaction(transactionId, false, toAddress, payable (msg.sender), amount, description, block.timestamp + deliveryTime);
         transactions[transactionId] = _transaction;
         transactionIds.push(transactionId);
         transactionCount++; 

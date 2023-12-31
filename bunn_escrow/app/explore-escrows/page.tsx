@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Web3 from "web3";
 import ABI from "./jsonAbi.json";
 import { useContractRead } from "wagmi";
@@ -43,13 +43,13 @@ export default function Explore() {
         <table className="grid-flow-row auto-rows-max grid my-6 overflow-x-auto h-[25rem]">
           <thead>
             <tr className="grid grid-flow-col grid-col-10">
-              <th className="mx-auto py-3">Id</th>
-              <th className="mx-auto py-3">Description</th>
-              <th className="mx-auto py-3">Sender</th>
-              <th className="mx-auto py-3">Reciever</th>
-              <th className="mx-auto py-3">Amount (eth)</th>
-              <th className="mx-auto py-3">Claimed</th>
-              <th className="mx-auto py-3">Time Left</th>
+              <th className="mx-auto py-3 w-[3rem]">Id</th>
+              <th className="mx-auto py-3 w-[20rem]">Description</th>
+              <th className="mx-auto py-3 w-[7rem]">Sender</th>
+              <th className="mx-auto py-3 w-[7rem]">Reciever</th>
+              <th className="mx-auto py-3 w-[10rem]">Amount (eth)</th>
+              <th className="mx-auto py-3 w-[5rem]">Claimed</th>
+              <th className="mx-auto py-3 w-[6.5rem]">Time Left</th>
             </tr>
           </thead>
           <tbody>
@@ -73,22 +73,29 @@ export default function Explore() {
                     className="grid grid-flow-col grid-col-10 hover:bg-white/10 cursor-pointer"
                     key={index}
                   >
-                    <td className="mx-auto py-3">{Number(transaction._id)}</td>
-                    <td className="mx-auto py-3">{transaction.description}</td>
-                    <td className="mx-auto py-3">
+                    <td className="flex justify-center mx-auto py-3 w-[3rem]">
+                      {Number(transaction._id)}
+                    </td>
+                    <td className="mx-auto py-3 w-[20rem]">
+                      {transaction.description}
+                    </td>
+                    <td className="flex justify-center mx-auto py-3 w-[7rem]">
                       <FormatString text={transaction.sender} />
                     </td>
-                    <td className="mx-auto py-3">
+                    <td className="flex justify-center mx-auto py-3 w-[7rem]">
                       <FormatString text={transaction.receiver} />
                     </td>
-                    <td className="mx-auto py-3">
+                    <td className="flex justify-center mx-auto py-3 w-[10rem]">
                       {web3.utils.fromWei(transaction.amount, "ether")}
                     </td>
-                    <td className="mx-auto py-3">
+                    <td className="flex justify-center mx-auto py-3 w-[5rem]">
                       {transaction.paidStatus.toString()}
                     </td>
-                    <td className="mx-auto py-3">
-                      {Number(transaction.paymentWindow)}
+                    <td className="flex justify-center mx-auto py-3 w-[6.5rem]">
+                      <FormatTimeLeft
+                        className={"mx-auto"}
+                        timeInSeconds={Number(transaction.paymentWindow)}
+                      />
                     </td>
                   </tr>
                 );
@@ -101,6 +108,37 @@ export default function Explore() {
     </div>
   );
 }
+
+export const FormatTimeLeft = ({
+  timeInSeconds,
+  className,
+}: {
+  timeInSeconds: number;
+  className?: string;
+}) => {
+  const [tick, setTick] = useState<boolean>();
+  useEffect(() => {
+    if (timeInSeconds) setInterval(() => setTick(!tick), 1000);
+  }, [tick, timeInSeconds]);
+
+  if (!timeInSeconds) return <span className={className}>No set time</span>;
+  const currentTime = Math.floor(Date.now() / 1000);
+  const timeDiff = timeInSeconds - currentTime;
+
+  if (timeDiff < 0) return "0h 0m 00s";
+
+  // Convert time left into days, hours, minutes, and seconds
+  const daysLeft = Math.floor(timeDiff / (60 * 60 * 24));
+  const hoursLeft = Math.floor((timeDiff % (60 * 60 * 24)) / (60 * 60));
+  const minutesLeft = Math.floor((timeDiff % (60 * 60)) / 60);
+  const secondsLeft = timeDiff % 60;
+
+  let returnString: string = `${
+    daysLeft < 0 ? daysLeft + "d" : ""
+  } ${hoursLeft}h ${minutesLeft}m ${secondsLeft}s`;
+
+  return <span className={className}>{returnString}</span>;
+};
 
 const FormatString = ({ text }: { text: string }) => {
   return (

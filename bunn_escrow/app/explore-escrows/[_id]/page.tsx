@@ -4,9 +4,10 @@ import { ethers } from "ethers";
 import { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { useContractRead } from "wagmi";
-import { FormatTimeLeft, TransactionType } from "../page";
+import { TransactionType } from "../page";
 import Web3 from "web3";
 import { useRouter } from "next/navigation";
+import { FormatTimeLeft } from "../utils";
 
 export default function TransactionDetailsPage({
   params,

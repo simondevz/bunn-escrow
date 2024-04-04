@@ -15,7 +15,7 @@ export default function Team() {
           emailAddress="iamhenryokeke@gmail.com"
         />
         <TeamCard
-          twitterUrl="https://twitter.com/simondevz"
+          twitterUrl="https://twitter.com/_simondevs"
           portfolioUrl="https://docs.google.com/document/d/1rBBk3FXI18sxh2FlYPNqI1J3Fk3cUOgHD960tYT0g5Q/edit?usp=sharing"
           phone="tel:+2348157959120"
           linkedInUrl="#"
